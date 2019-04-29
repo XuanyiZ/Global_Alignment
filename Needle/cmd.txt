@@ -1,0 +1,2 @@
+python task2.py 500
+python task1.py S2.txt S3.txt subs.txt -5 
