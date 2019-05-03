@@ -1,7 +1,7 @@
 import numpy as np 
 import itertools,math
 import pickle,os
-import time
+import time,sys
 
 t = 3
 backtracking = {}
@@ -105,6 +105,7 @@ def block_compute(A, B, C, E):
 
         
 def main(str1, str2):
+    #if lookup table exists, just read it; else, create it and store
     exists = os.path.isfile('dict')
     LUP = {}
     if exists:
@@ -115,28 +116,28 @@ def main(str1, str2):
         with open("dict", "wb") as file:
             pickle.dump(LUP, file)
     
-    start_time = time.time()
-
+    
+    #initialize dp array
     n = len(str1)
 
     DP_final = np.zeros((n+1, n+1))
-    for i in range(0, n+1):
-        DP_final[i,0] = i * 1
-        DP_final[0,i] = i * 1
+    DP_final[0] = [i for i in range(n+1)]
+    DP_final[:,0]=[i for i in range(n+1)]
 
-    #calculate first block cuz empty string
+    
     str1_new = "_"+str1
     str2_new = "_"+str2
 
-
-    #officially start other blocks
+    start_time = time.time()
+    #officially start main loop: fill dp table block by block
     for i in range(0, n, t-1):
         for j in range(0, n, t-1):
             A = DP_final[i:i+t, j]
             B = DP_final[i,j:j+t]
-            k = DP_final[i][j]
-            e1 = get_differences(A)
-            e2 = get_differences(B)
+            #k = DP_final[i][j]
+            
+            e1 = tuple(j-i for i, j in zip(A[:-1], A[1:]))
+            e2 = tuple(j-i for i, j in zip(B[:-1], B[1:]))
             e3 = str1_new[i:i+t]
             e4 = str2_new[j:j+t]
 
@@ -147,13 +148,14 @@ def main(str1, str2):
                 DP_final[i+t-1, j+1+index] = B_[index] + DP_final[i+t-1,j+index]
                 DP_final[i+index+1, j+t-1] = A_[index] + DP_final[i+index, j+t-1]
 
-    print DP_final
+    print("--- %s seconds ---" % (time.time() - start_time))
+
+    #print DP_final
     final_s1, final_s2 = traceback(str1, str2, DP_final, LUP)
     print "score: " + str(DP_final[len(DP_final)-1, len(DP_final)-1])
     print "s1: "+final_s1
     print "s2: "+final_s2
 
-    print("--- %s seconds ---" % (time.time() - start_time))
 
 
 
@@ -262,9 +264,28 @@ def traceback(str1, str2, DP_final, LUP):
 if __name__ == '__main__':
   
     #traceback("", "", np.zeros((7,7)), None)
-    main("AGTCGCAGGTTACCGT", "GCTAGGATCATGCAGT")
+    #main("AGTCGCAGGTTACCGT", "GCTAGGATCATGCAGT")
     #main("AGCGAA", "GCTAGA")
     #print(block_compute((1,1), (1, 1), '*GC', '*AG'))
+    if sys.argv[1] and sys.argv[2]:
+        x=""
+        y=""
+        s1name = sys.argv[1]
+        s2name = sys.argv[2]
+
+        s1File = open(s1name, "r")
+        for line in s1File:
+            if line[0] != '>':
+			    x += line
+
+
+        s2File = open(s2name, "r")
+        for line in s2File:
+            if line[0] != '>':
+                y += line
+
+        main(x,y)
+
     
 
 
