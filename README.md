@@ -1,6 +1,8 @@
 # Global_Alignment
 
-to do:
+Three algorithms are saved in three folders, respectively.
 
-1. fix seq length L, draw perofrmance comparison graph with different T
-2. fix seq length L, draw perofrmance comparison graph with different algorithm
+To run Four Russian algorithm, you need to provide two .fasta files for S1 and S2.
+
+`python fourRussians.py s1.fasta s2.fasta`
+
